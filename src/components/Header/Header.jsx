@@ -13,13 +13,16 @@ const Header = () => {
       <li>
         <NavLink to="/register">Register</NavLink>
       </li>
+      <li>
+        <NavLink to="/heroregister">Hero Register</NavLink>
+      </li>
     </>
   );
 
   return (
     <div>
       <div className="navbar bg-base-100">
-        <div className="navbar-start">
+        <div className="navbar-start ">
           <div className="dropdown">
             <label tabIndex={0} className="btn btn-ghost lg:hidden">
               <svg
