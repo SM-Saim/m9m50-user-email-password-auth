@@ -11,6 +11,7 @@ const Register = () => {
     e.preventDefault();
     const email = e.target.email.value;
     const password = e.target.password.value;
+    const accepted = e.target.terms.checked;
     console.log(email, password);
 
     // reset error
@@ -24,8 +25,10 @@ const Register = () => {
     } else if (!/[A-Z]/.test(password)) {
       setRegisterError("You should give atleast one upper case in password");
       return;
+    } else if (!accepted) {
+      setRegisterError("Please accept our terms and conditions");
+      return;
     }
-
     // create user
     createUserWithEmailAndPassword(auth, email, password)
       .then((result) => {
@@ -73,8 +76,20 @@ const Register = () => {
           )}
         </span>
         <br />
+
         <input
-          className="btn btn-secondary w-2/5"
+          className=" mb-5 ml-[-285px] mr-2"
+          type="checkbox"
+          name="checkbox"
+          id="terms"
+        />
+        <label htmlFor="terms">
+          Accept our <a href="">terms and conditions</a>
+        </label>
+        <br />
+
+        <input
+          className="btn btn-accent w-2/5"
           type="submit"
           value="Register"
         />
