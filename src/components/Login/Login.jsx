@@ -1,21 +1,20 @@
 import {
-  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import React from "react";
+import { useRef, useState } from "react";
 import auth from "../../firebase/firebase";
+import { Link } from "react-router-dom";
 
 const Login = () => {
-  const handleLogIn = (e) => {
-    const [registerError, setRegisterError] = useState("");
-    const [success, setSuccess] = useState("");
-    const [showPassword, setShowPassword] = useState(false);
+  const [registerError, setRegisterError] = useState("");
+  const [success, setSuccess] = useState("");
+  const emailRef = useRef(null);
 
+  const handleLogIn = (e) => {
     e.preventDefault();
     const email = e.target.email.value;
     const password = e.target.password.value;
-    const accepted = e.target.terms.checked;
-
     console.log(email, password);
 
     //add validetion
@@ -24,24 +23,38 @@ const Login = () => {
     // reset success
     setSuccess("");
 
-    if (password.length < 6) {
-      setRegisterError("Password should be at least 6 or more character");
-      return;
-    } else if (!/[A-Z]/.test(password)) {
-      setRegisterError("You should give atleast one upper case in password");
-      return;
-    } else if (!accepted) {
-      setRegisterError("Please accept our terms and conditions");
-      return;
-    }
-
-    createUserWithEmailAndPassword(auth, email, password)
+    signInWithEmailAndPassword(auth, email, password)
       .then((result) => {
-        const loggedIn = result.user;
-        console.log(loggedIn);
+        console.log(result.user);
+        if (result.user.emailVerified) {
+          setSuccess("User logged in successfully");
+        } else {
+          alert("Please verify your email address");
+        }
       })
       .catch((error) => {
         console.error(error);
+        setRegisterError(error.message);
+      });
+  };
+
+  const handleForgetPassword = () => {
+    const email = emailRef.current.value;
+    if (!email) {
+      console.log("PLEASE PROVIDE AN EMAIL", emailRef.current.value);
+      return;
+    } else if (!/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(email)) {
+      console.log("Please enter a valid email");
+      return;
+    }
+
+    // send validation email
+    sendPasswordResetEmail(auth, email)
+      .then(() => {
+        alert("Please Check your email");
+      })
+      .catch((error) => {
+        console.log(error);
       });
   };
 
@@ -68,6 +81,7 @@ const Login = () => {
                   placeholder="Enter Email"
                   className="input input-bordered"
                   name="email"
+                  ref={emailRef}
                 />
               </div>
               <div className="form-control">
@@ -80,7 +94,7 @@ const Login = () => {
                   className="input input-bordered"
                   name="password"
                 />
-                <label className="label">
+                <label onClick={handleForgetPassword} className="label">
                   <a href="#" className="label-text-alt link link-hover">
                     Forgot password?
                   </a>
@@ -90,6 +104,19 @@ const Login = () => {
                 <button className="btn btn-primary">Login</button>
               </div>
             </form>
+            {registerError && (
+              <p className="text-red-500 font-semibold m-5">{registerError}</p>
+            )}
+            {success && (
+              <p className="text-green-500 font-semibold m-5">{success}</p>
+            )}
+
+            <p>
+              New to this website? Please
+              <Link className="text-sky-600" to="/register">
+                Register
+              </Link>
+            </p>
           </div>
         </div>
       </div>

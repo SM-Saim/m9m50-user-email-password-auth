@@ -1,7 +1,12 @@
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  updateProfile,
+} from "firebase/auth";
 import React, { useState } from "react";
 import auth from "../../firebase/firebase";
 import { AiFillEyeInvisible, AiFillEye } from "react-icons/ai";
+import { Link } from "react-router-dom";
 
 const Register = () => {
   const [registerError, setRegisterError] = useState("");
@@ -9,10 +14,11 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const handleRegister = (e) => {
     e.preventDefault();
+    const name = e.target.name.value;
     const email = e.target.email.value;
     const password = e.target.password.value;
     const accepted = e.target.terms.checked;
-    console.log(email, password);
+    console.log(email, password, name, accepted);
 
     // reset error
     setRegisterError("");
@@ -35,6 +41,25 @@ const Register = () => {
         const loggedIn = result.user;
         console.log(loggedIn);
         setSuccess("User successfully created");
+
+        // update profile
+        updateProfile(result.user, {
+          displayName: name,
+          photoURL: "https://example.com/jane-q-user/profile.jpg",
+        })
+          .then(() => {
+            console.log("Profile updated");
+          })
+          .catch();
+
+        // send verifation email
+        sendEmailVerification(result.user)
+          .then(() => {
+            alert("Please check you email and verify your account");
+          })
+          .catch((error) => {
+            console.log(error);
+          });
       })
       .catch((error) => {
         console.error(error);
@@ -48,6 +73,15 @@ const Register = () => {
         Please register
       </h2>
       <form onSubmit={handleRegister} className="bg-slate-200 p-5 text-center ">
+        <input
+          className="mb-5 w-2/5 text-xl py-2 pl-1 rounded-md"
+          type="text"
+          name="text"
+          id=""
+          placeholder="Your Name"
+          required
+        />
+        <br />
         <input
           className="mb-5 w-2/5 text-xl py-2 pl-1 rounded-md"
           type="email"
@@ -93,12 +127,16 @@ const Register = () => {
           type="submit"
           value="Register"
         />
+        {registerError && (
+          <p className="text-red-500 font-semibold m-5">{registerError}</p>
+        )}
+        {success && (
+          <p className="text-green-500 font-semibold m-5">{success}</p>
+        )}
+        <p>
+          Already have an account? Please <Link to="/login">Login</Link>
+        </p>
       </form>
-
-      {registerError && (
-        <p className="text-red-500 font-semibold m-5">{registerError}</p>
-      )}
-      {success && <p className="text-green-500 font-semibold m-5">{success}</p>}
     </div>
   );
 };
